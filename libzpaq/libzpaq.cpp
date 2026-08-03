@@ -580,6 +580,7 @@ static void pbkdf2(const char* pw, int pwLen, const char* salt, int saltLen,
   assert(c==1);
   assert(dkLen%32==0);
   assert(pwLen<=64);
+  (void)c;  // lrzip: NDEBUG drops the only use of c
 
   libzpaq::SHA256 sha256;
   char b[32];
