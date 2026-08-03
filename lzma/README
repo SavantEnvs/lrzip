@@ -13,9 +13,8 @@ Previous lrzip integration was based on SDK ~4.63 / 9.x with a zlib-like
 wrapper. The LzmaCompress/LzmaUncompress API is unchanged in shape;
 internal code, default dictionary sizes per level, and build deps differ.
 
-Build: automake liblzma.la in C/ (see C/Makefile.am). Optional ASM CRC
-from older trees is no longer used; the match finder carries its own CRC
-table.
+Build: automake liblzma.la in C/ (see C/Makefile.am). The ASM CRC from
+older trees has been removed; the match finder carries its own CRC table.
 
 Docs from the SDK (DOC/) are installed as lzma documentation where the
 parent Makefile.am lists them.

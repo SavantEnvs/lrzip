@@ -78,20 +78,6 @@ AC_CHECK_PROG([HAVE_POD2MAN], [pod2man], [yes])
 AS_IF([test "$HAVE_POD2MAN" != "yes"],
 	AC_MSG_FAILURE([pod2man is needed to generate manual from POD]))
 
-AC_ARG_ENABLE(
-		asm,
-		[AS_HELP_STRING([--enable-asm],[Enable native Assembly code])],
-		ASM=$enableval,
-		ASM=yes
-             )
-
-if test x"$ASM" = x"yes"; then
-	AC_CHECK_PROG( ASM_PROG, nasm, nasm, no ) # fix to set ASM_PROG to nasm, not yes.
-	if test x"$ASM_PROG" = x"no "; then
-		ASM=no
-	fi
-fi
-
 static=no
 AC_ARG_ENABLE([static-bin],
 	[AS_HELP_STRING([--enable-static-bin],[Build statically linked binary @<:@default=no@:>@])],
@@ -145,33 +131,10 @@ LIBS="$PTHREAD_LIBS $LIBS"
 CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
 CXXFLAGS="$CXXFLAGS $PTHREAD_CXXFLAGS"
 
-# final checks for assembler
-# ASM is back for x86_64 by using newer CRC code from p7zip-16.02
-# object files handled in lzma/C/Makefile.am
-if test x"$ASM" = x"yes"; then
-	ASM_OPT="-I../ASM/x86/"
-	case $host in
-		i?86-*)
-			ASM_OPT="$ASM_OPT -g -f elf" ;;
-		x86_64-*)
-			ASM_OPT="$ASM_OPT -Dx64 -g -f elf64" ;;
-		*)
-			# nasm may exist but the ASM sources are x86-only
-			ASM=no
-			ASM_OPT= ;;
-	esac
-else
-	ASM_OPT=
-fi
-AM_CONDITIONAL([USE_ASM], [test x"$ASM" = x"yes"])
-AC_SUBST([ASM_OPT])
-AC_SUBST([ASM_CMD])
-
 AC_CONFIG_FILES([
 Makefile
 lzma/Makefile
 lzma/C/Makefile
-lzma/ASM/x86/Makefile
 doc/Makefile
 man/Makefile
 ])
@@ -187,7 +150,6 @@ echo
 echo
 echo "Configuration Options Summary:"
 echo
-echo "  ASM................: $ASM"
 echo "  Static binary......: $static"
 echo
 echo "Compilation............: make (or gmake)"

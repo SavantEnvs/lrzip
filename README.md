@@ -51,7 +51,6 @@ A quick guide on building and installing.
  - liblzo2-dev
  - liblz4-dev
  - coreutils
- - Optional nasm
  - git if you want a repo-fresh copy
  - an OS with the usual *nix headers and libraries
 
