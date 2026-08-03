@@ -702,7 +702,7 @@ out:
 ssize_t put_fdout(rzip_control *control, void *offset_buf, ssize_t ret)
 {
 	if (!TMP_OUTBUF)
-		return write(control->fd_out, offset_buf, (size_t)ret);
+		return write_maxrw(control->fd_out, offset_buf, ret);
 
 	if (unlikely(control->out_ofs + ret > control->out_maxlen)) {
 		/* The data won't fit in a temporary output buffer so we have
@@ -720,7 +720,7 @@ ssize_t put_fdout(rzip_control *control, void *offset_buf, ssize_t ret)
 		}
 		/* Deallocate now unused tmpoutbuf and unset tmp_outbuf flag */
 		close_tmpoutbuf(control);
-		return write(control->fd_out, offset_buf, (size_t)ret);
+		return write_maxrw(control->fd_out, offset_buf, ret);
 	}
 
 	memcpy(control->tmp_outbuf + control->out_ofs, offset_buf, ret);

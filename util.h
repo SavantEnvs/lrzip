@@ -108,6 +108,14 @@ static inline bool lrzip_size_ok(i64 n, i64 maxram)
 	return true;
 }
 
+/* Single write() capped at MAX_RW_COUNT. Every caller already loops on a
+ * short write, so the cap just keeps us out of the oversized request that
+ * Linux silently truncates and macOS rejects with EINVAL. */
+static inline ssize_t write_maxrw(int fd, void *buf, i64 len)
+{
+	return write(fd, buf, (size_t)MIN(len, MAX_RW_COUNT));
+}
+
 /* rzip match/literal token lengths are always emitted ≤ 0xFFFF. */
 #define LRZIP_MAX_TOKEN_LEN	0xFFFF
 bool read_config(rzip_control *control);
