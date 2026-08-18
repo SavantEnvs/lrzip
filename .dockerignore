@@ -1,0 +1,20 @@
+# .dockerignore for the commit-image build.
+# Goal: bake in the FULL repo (including .git history — the grader uses it), dropping only local
+# build artifacts. Dev image, not minimal.
+
+# ── Build outputs / local cruft ──────────────────────────────────────────────
+# mayhem/build.sh writes its outputs under mayhem-build-fuzz/ and mayhem-build-oracle/ (both
+# out-of-tree autotools build dirs) at build time -- keep those out of the context.
+mayhem-build-fuzz/
+mayhem-build-oracle/
+*.o
+*.a
+*.lo
+*.la
+# NB: no blanket *.lrz here on purpose -- mayhem/fuzz_decompress/testsuite/*.lrz are COMMITTED
+# seed archives, not build output (build.sh's own .lrz scratch files never land in the source tree).
+
+# ── Editor / OS noise ────────────────────────────────────────────────────────
+.DS_Store
+*.swp
+*~

@@ -1,0 +1,35 @@
+project: savantenvs/lrzip
+target: fuzz_decompress
+
+# lrzip is heavily file/fd-oriented (rzip_control uses real fd_in/fd_out, mkstemp() scratch
+# files, and its own error paths call libc exit() on essentially every validation failure --
+# see mayhem/build.sh header). That is fundamentally incompatible with a persistent in-process
+# libFuzzer harness (every rejected/malformed archive would call exit() and end the whole
+# fuzzing session, and lrzip never frees several control-struct buffers because it is designed
+# to run once per process and let the OS reclaim on exit -- calling it thousands of times in one
+# process leaks unboundedly). So this target wraps the REAL, unmodified lrzip CLI, built TWICE
+# (see build.sh): once with afl-clang-fast + $SANITIZER_FLAGS for SanitizerCoverage-guided
+# fork-server fuzzing (each Mayhem test case gets its own fresh forked process -- exactly how
+# lrzip is meant to run, and immune to both the exit()-per-input and the leak-per-call issues
+# above), and once with plain clang + normal flags as the mayhem/test.sh oracle.
+#
+# `-t` = test/verify mode: decompresses the archive fully (header, rzip reconstruction, and
+# whichever back end (lzma/bzip2/gzip/lzo/zpaq) the archive's own per-block header selects) and
+# discards the output via a self-deleting temp file -- so every back end is real attack surface
+# reachable from this one target's fuzzer-controlled header, no separate per-back-end targets
+# needed. `-p 1` forces single-threaded decompression (brief SS6b: thread pools make crash
+# attribution/hangs undiagnosable). `-f -q` just quiets normal-path progress output.
+# TMPDIR=/dev/shm (mayhem/Dockerfile ENV) is what makes lrzip's own mkstemp() scratch file for
+# `-t` land in the one writable location under the read-only Mayhem image mount (SPEC SS6.2 item 13).
+cmds:
+  - cmd: /mayhem/fuzz_decompress -t -p 1 -f -q @@
+    afl: true
+    # NOTE: the key is `dictionary:`, NOT `dict:` -- even for an afl: true target. Mayhem hard-rejects
+    # `dict:` with "Additional properties are not allowed ('dict' was unexpected)" and the run never
+    # starts. (This repo previously appeared to prove `dict:` was the afl form; it did not -- that line
+    # was only ever an uncommitted working-tree change, so it was never actually exercised in Mayhem.)
+    dictionary: /mayhem/fuzz_decompress.dict
+
+testsuite:
+  - https://$MAYHEM_DOMAIN/$MAYHEM_PROJECT/$MAYHEM_TARGET/testsuite.tar
+  - file://mayhem/fuzz_decompress/testsuite

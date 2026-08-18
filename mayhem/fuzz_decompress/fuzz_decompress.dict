@@ -1,0 +1,9 @@
+# Dictionary for the lrzip .lrz decompression target (RFC-less, format is
+# lrzip's own; tokens lifted from lrzip.c get_magic()/read_magic() and the
+# per-block header constants in lrzip_private.h). One token per line, no
+# embedded newlines (libFuzzer ParseDictionaryFile aborts on a multi-line
+# token -- see docs/netnew-worker-prompt.md SS6).
+"LRZI"
+"\x00\x07\x02"
+"\x00\x06\x00"
+"\x00\x04\x00"
