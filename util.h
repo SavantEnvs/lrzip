@@ -116,8 +116,13 @@ static inline ssize_t write_maxrw(int fd, void *buf, i64 len)
 	return write(fd, buf, (size_t)MIN(len, MAX_RW_COUNT));
 }
 
-/* rzip match/literal token lengths are always emitted ≤ 0xFFFF. */
+/* rzip match/literal token lengths are always emitted ≤ 0xFFFF.
+ * Format v0.4 stored 8-byte lengths and could emit longer tokens. */
 #define LRZIP_MAX_TOKEN_LEN	0xFFFF
+#define LRZIP_MAX_TOKEN_LEN_V4	((i64)1 << 32)
+#define lrzip_max_token_len(control) \
+	(((control)->major_version == 0 && (control)->minor_version <= 4) ? \
+	LRZIP_MAX_TOKEN_LEN_V4 : (i64)LRZIP_MAX_TOKEN_LEN)
 bool read_config(rzip_control *control);
 void lrz_stretch(rzip_control *control);
 void lrz_stretch2(rzip_control *control);

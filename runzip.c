@@ -196,7 +196,7 @@ static uchar *runzip_get_buf(rzip_control *control, i64 len)
 {
 	uchar *nbuf;
 
-	if (unlikely(!lrzip_size_ok(len, LRZIP_MAX_TOKEN_LEN)))
+	if (unlikely(!lrzip_size_ok(len, lrzip_max_token_len(control))))
 		return NULL;
 	if (likely(len <= control->runzip_buf_len))
 		return control->runzip_buf;
@@ -323,7 +323,7 @@ static i64 unzip_literal(rzip_control *control, void *ss, i64 len,
 	if (!len)
 		return 0;
 
-	if (unlikely(len > LRZIP_MAX_TOKEN_LEN))
+	if (unlikely(len > lrzip_max_token_len(control)))
 		failure_return(("Literal length %"PRId64" exceeds format max\n", len), -1);
 
 	buf = runzip_get_buf(control, len);
@@ -381,7 +381,7 @@ static i64 unzip_match(rzip_control *control, void *ss, struct runzip_s0 *s0,
 	if (unlikely(len < 0))
 		failure_return(("len %"PRId64" is negative in unzip_match!\n",len), -1);
 
-	if (unlikely(len > LRZIP_MAX_TOKEN_LEN))
+	if (unlikely(len > lrzip_max_token_len(control)))
 		failure_return(("Match length %"PRId64" exceeds format max\n", len), -1);
 
 	/* Tracked write position — avoids lseek(SEEK_CUR) every match. */
